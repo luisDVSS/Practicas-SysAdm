@@ -236,15 +236,27 @@ done
 echo "Configurando la interfaz del DHCP..."
 sed -i "s/^INTERFACESv4=.*/INTERFACESv4=\"$interfaz\"/" /etc/default/isc-dhcp-server
 echo "Generando archivo de configuracion del DHCP...."
+#configuracion del dhcp
 cat > /etc/dhcp/dhcpd.conf <<EOF
 default-lease-time $min_horas;
 authoritative;
 subnet $network netmask $mascara {
 range $ip_min $ip_max;
-option routers $puerta;
-option domain-name-servers $ip_dns;
-}
 EOF
+# Agregar router solo si existe
+if [ -n "$puerta" ]; then
+    echo "option routers $puerta;" >> /etc/dhcp/dhcpd.conf
+fi
+
+# Agregar DNS solo si existe
+if [ -n "$ip_dns" ]; then
+    echo "option domain-name-servers $ip_dns;" >> /etc/dhcp/dhcpd.conf
+fi
+# Cerrar bloque
+echo "}" >> /etc/dhcp/dhcpd.conf
+
+
+
 dhcp_status
 }
 #INSTALACION DHCP
