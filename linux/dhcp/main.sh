@@ -173,27 +173,46 @@ done
 #validacion DNS---------
 while :; do
 read -p "IP del servidor DNS: " ip_dns
- if valid_ip "$ip_dns"; then
-	 echo "IP del dns Valida..."
-	 break
+ if [ -z "$ip_dns" ]; then
+ echo "Haz dejado el dns vacio"
+	break
  else
-	 echo "[AVISO] IP Invalida"
+ 	if valid_ip "$ip_dns"; then
+	 	echo "IP del dns Valida..."
+	 	break
+	 else
+	 	echo "[AVISO] IP Invalida"
+ 	fi
  fi
+ 
 done
 #Validacion Gateway
 while :; do
 	read -p "IP de la puerta de enlace; " puerta
-	if valid_ip $puerta; then
+	if [ -z "$puerta" ]; then
+	echo "has dejado la puerta de enlace vacia, procediendo"
+	break
+	else
+	if valid_ip "$puerta"; then
 		echo "IP de la puerta de enlace valida..."
-		break
+		echo "validando que este en el segmento de red correcto.."
+		if mismo_segmentos "$puerta" "$network" "$mascara"; then 
+			echo "La puerta si esta dentro del segmento"
+		       	break
+	       	else
+			echo "La puerta de enlace no esta dentro del segmento de red correcto"
+		fi
+	
 	else
 		echo "[AVISO] IP Invalida"
 	fi
+	fi
+	
 done
 #INPUTS DE LOS TIME LEASES
 while :; do
 	while :; do
-		read -p "Tiempo DEFAULT de lease en horas: " min_horas
+		read -p "Tiempo DEFAULT de lease en segundos: " min_horas
 		if ! isInt "$min_horas"; then
 			echo "[AVISO] Ingresa un valor numerico entero !"
 		else
@@ -201,27 +220,16 @@ while :; do
 
 		fi
 	done
-	while :; do
-		read -p "Tiempo Maximo de lease en horas: " max_horas
-		if ! isInt "$max_horas"; then
-			echo "[AVISO] Ingresa un valor numerico entero !"
-		else
-			break
-		fi
-	done
+	
 	echo "Validando coherencia de lease time.."
-	if (( max_horas < min_horas )); then
-		echo "[AVISO] Las horas default no pueden ser mayor a las horas maximas"
-	        
-	else
+	
 		if (( min_horas > 0 )); then
-			max_horas=$(( max_horas * 3600 ))
-			min_horas=$(( min_horas * 3600 ))
+		echo "tiempo de consecion valido"
 			break
 		else
 			echo "[AVISO] El tiempo de consesion tiene que ser mayor a 0"
 		fi
-	fi
+	
 
 done
 #Configuracion del archivo de intefaces
@@ -230,7 +238,6 @@ sed -i "s/^INTERFACESv4=.*/INTERFACESv4=\"$interfaz\"/" /etc/default/isc-dhcp-se
 echo "Generando archivo de configuracion del DHCP...."
 cat > /etc/dhcp/dhcpd.conf <<EOF
 default-lease-time $min_horas;
-max-lease-time $max_horas;
 authoritative;
 subnet $network netmask $mascara {
 range $ip_min $ip_max;
