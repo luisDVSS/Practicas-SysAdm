@@ -53,7 +53,8 @@ function Convert-PrefixToMask {
         return "0.0.0.0"
     }
 
-    $maskInt = 0xFFFFFFFF -shl (32 - $Prefix)
+    $maskInt = ([uint32]::MaxValue) -shl (32 - $Prefix)
+
 
     # Convertir a octetos
     $o1 = ($maskInt -shr 24) -band 0xFF
@@ -74,9 +75,7 @@ function Test-ValidNetwork {
     if (-not (Test-ValidIPFormat $NetworkIP)) {
         return $false
     }
-    if (-not (Test-ValidNetworkIP $NetworkIP)) {
-        return $false
-    }
+    
     # Validar prefijo CIDR
     if ($Prefix -lt 0 -or $Prefix -gt 32) {
         return $false
@@ -90,7 +89,13 @@ function Test-ValidNetwork {
            -bor  $ipBytes[3]
 
     # Crear máscara a partir del prefijo
-    $maskInt = if ($Prefix -eq 0) { 0 } else { 0xFFFFFFFF -shl (32 - $Prefix) }
+   if ($Prefix -eq 0) {
+    $maskInt = [uint32]0
+}
+else {
+    $maskInt = ([uint32]::MaxValue) -shl (32 - $Prefix)
+
+}
 
     # Calcular red real
     $networkCalc = $ipInt -band $maskInt
@@ -195,7 +200,9 @@ else {
 
 } until (Test-ValidNetwork $network $prefix)
 
-$mascara=Convert-PrefixToMask $prefix
+
+$mascara = Convert-PrefixToMask $prefix
+
 $serverIP = Get-FirstHost $network $prefix
 Config-RedSV $interfaz $serverIP $prefix
 
