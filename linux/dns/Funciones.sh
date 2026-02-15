@@ -2,6 +2,40 @@
 getService() {
     apt install -y "$@" &>/dev/null
 }
+
+getDomains() {
+    local conf="/etc/bind/named.conf.local"
+
+    printf "%-30s %-15s\n" "DOMINIO" "IP"
+    printf "%-30s %-15s\n" "------------------------------" "---------------"
+
+    awk '
+    BEGIN { FS="\"" }
+
+    /^[[:space:]]*zone[[:space:]]+"/ {
+        zone=$2
+        if (zone !~ /arpa/) {
+            inzone=1
+        } else {
+            inzone=0
+        }
+    }
+
+    inzone && /file/ {
+        file=$2
+        gsub(";", "", file)
+
+        cmd = "awk '\''/\\sA\\s/ {print $NF; exit}'\'' " file
+        cmd | getline ip
+        close(cmd)
+
+        if (ip != "")
+            printf "%-30s %-15s\n", zone, ip
+    }
+
+    ' "$conf"
+}
+
 isHostIp() {
     local ip="$1"
 
