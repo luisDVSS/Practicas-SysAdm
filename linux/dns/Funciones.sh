@@ -192,3 +192,63 @@ getOcteto() {
     4) echo "$o4" ;;
     esac
 }
+getIpDomain() {
+    local dominio="$1"
+    grep -E "^[[:space:]]*@.*IN[[:space:]]+A" /etc/bind/db.$dominio | awk '{print $NF}'
+}
+
+domainExists() {
+    local dominio="$1"
+    grep -qi "zone \"$dominio\"" /etc/bind/named.conf.local
+}
+domainInvExists() {
+    local dominio_inverso="$1"
+    grep -qi "zone \"$dominio_inverso.in-addr.arpa\"" /etc/bind/named.conf.local
+}
+zonaInversaTieneMasPtr() {
+    local archivo="$1"
+    local cantidad
+    cantidad=$(grep -c "IN[[:space:]]\+PTR" "$archivo")
+    if [ "$cantidad" -gt 1 ]; then
+        return 0
+    else
+        return 1
+    fi
+
+}
+deleteDomain() {
+    read -p "Dominio a eliminar" dominio
+    if ! domainExists "$dominio"; then
+        echo "El dominio no existe"
+        return 1
+    fi
+
+    ip_add=$(getIpDomain "$dominio")
+
+    if [ -z "$ip_add" ]; then
+        echo "No se pudo obtener la IP del dominio"
+        return 1
+    fi
+    dominio_inverso=$(getZonaInversa "$ip_add")
+    archivo_inverso="/etc/bind/db.$dominio_inverso"
+    ultimo_octeto=$(getOcteto "$ip_add" 4)
+    sed -i "/zone \"$dominio\" {/,/};/d" /etc/bind/named.conf.local
+    rm -f /etc/bind/db."$dominio"
+    if [ -f "$archivo_inverso" ]; then
+
+        total_ptr=$(grep -c "IN[[:space:]]\+PTR" "$archivo_inverso")
+
+        if [ "$total_ptr" -gt 1 ]; then
+            # Solo borrar el PTR
+            sed -i "/^[[:space:]]*${ultimo_octeto}[[:space:]]\+IN[[:space:]]\+PTR/d" "$archivo_inverso"
+        else
+            # Era el ultimo PTR → borrar zona completa
+            sed -i "/zone \"$dominio_inverso.in-addr.arpa\" {/,/};/d" /etc/bind/named.conf.local
+            rm -f "$archivo_inverso"
+        fi
+    fi
+
+    echo "Dominio eliminado correctamente"
+    resetBind
+
+}

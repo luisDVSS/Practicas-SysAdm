@@ -54,7 +54,7 @@ setConf_files() {
     local ultimo_octeto
     ultimo_octeto="$(getOcteto "$ip_add" 4)"
     #Adicion de las dos zonnas de una, inversa y nombre de dom
-    if ! grep -qi "zone \"$dominio\"" /etc/bind/named.conf.local; then
+    if ! domainExists "$dominio"; then
         cat <<EOF >>/etc/bind/named.conf.local
 zone "$dominio" {
     type master;
@@ -63,7 +63,7 @@ zone "$dominio" {
 EOF
     fi
 
-    if ! grep -qi "zone \"$dominio_inverso.in-addr.arpa\"" /etc/bind/named.conf.local; then
+    if ! domainInvExists "$dominio_inverso"; then
         cat <<EOF >>/etc/bind/named.conf.local
 zone "$dominio_inverso.in-addr.arpa" {
     type master;

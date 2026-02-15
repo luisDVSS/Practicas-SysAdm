@@ -20,6 +20,7 @@ while :; do
     echo "Selecciona una opcion"
     echo "1) Ver si Bind9 esta intalado"
     echo "2) Instalar Bind9"
+    echo "3) Eliminar un dominio"
     read -r opc
     case "$opc" in
     1)
@@ -41,6 +42,14 @@ while :; do
             getService bind9 bind9-doc bind9utils
             echo "servicios instalados correctamente"
             askConf
+            continue
+        fi
+        ;;
+    3)
+        if isInstalled bind9 bind9-doc bind9utils; then
+            deleteDomain
+        else
+            echo "Los servicios no estan instalados.."
             continue
         fi
         ;;
