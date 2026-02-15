@@ -15,8 +15,14 @@ function Install-DHCP {
 }
 function Convert-IPToInt {
     param ([string]$IP)
-    $b = $IP.Split('.') | ForEach-Object { [int]$_ }
-    return ($b[0] -shl 24) -bor ($b[1] -shl 16) -bor ($b[2] -shl 8) -bor $b[3]
+
+    $b = $IP.Split('.') | ForEach-Object { [uint32]$_ }
+
+    return `
+        ($b[0] -shl 24) `
+    -bor ($b[1] -shl 16) `
+    -bor ($b[2] -shl 8)  `
+    -bor  $b[3]
 }
 
 function Get-FirstHost {
@@ -25,13 +31,14 @@ function Get-FirstHost {
         [int]$Prefix
     )
 
-    $ipBytes = $NetworkIP.Split('.') | ForEach-Object { [int]$_ }
-    $ipInt = ($ipBytes[0] -shl 24) `
-           -bor ($ipBytes[1] -shl 16) `
-           -bor ($ipBytes[2] -shl 8) `
-           -bor  $ipBytes[3]
+    $b = $NetworkIP.Split('.') | ForEach-Object { [uint32]$_ }
 
-    # Primer host = network + 1
+    $ipInt =
+        ($b[0] -shl 24) `
+     -bor ($b[1] -shl 16) `
+     -bor ($b[2] -shl 8)  `
+     -bor  $b[3]
+
     $firstHostInt = $ipInt + 1
 
     return "{0}.{1}.{2}.{3}" -f `
@@ -83,10 +90,11 @@ function Test-ValidNetwork {
 
     # Convertir IP a entero
     $ipBytes = $NetworkIP.Split('.') | ForEach-Object { [int]$_ }
-    $ipInt = ($ipBytes[0] -shl 24) `
-           -bor ($ipBytes[1] -shl 16) `
-           -bor ($ipBytes[2] -shl 8) `
-           -bor  $ipBytes[3]
+   $ipInt =
+    ([uint32]$ipBytes[0] -shl 24) `
+ -bor ([uint32]$ipBytes[1] -shl 16) `
+ -bor ([uint32]$ipBytes[2] -shl 8)  `
+ -bor ([uint32]$ipBytes[3])
 
     # Crear máscara a partir del prefijo
    if ($Prefix -eq 0) {
@@ -110,9 +118,10 @@ function Get-Broadcast {
         [string]$Mask
     )
 
-    $net = Convert-IPToInt $Network
-    $maskInt = Convert-IPToInt $Mask
-    $broadcast = $net -bor (-bnot $maskInt)
+    $net  = [uint32](Convert-IPToInt $Network)
+    $mask = [uint32](Convert-IPToInt $Mask)
+
+    $broadcast = $net -bor ([uint32]::MaxValue -bxor $mask)
 
     return "{0}.{1}.{2}.{3}" -f `
         (($broadcast -shr 24) -band 0xFF),
@@ -273,10 +282,15 @@ if (-not [string]::IsNullOrWhiteSpace($gw)) {
 
 if (-not [string]::IsNullOrWhiteSpace($dns)) {
     Set-DhcpServerv4OptionValue -DnsServer $dns
+    Write-Host "Configurando DNS..."
+    Set-DnsClientServerAddress `
+    -InterfaceAlias $interfaz `
+    -ServerAddresses $dns
 }
 
 Restart-Service DHCPServer
 Write-Host "DHCP configurado y activo"
+
             
             Read-Host "Presiona ENTER para continuar"
         }
