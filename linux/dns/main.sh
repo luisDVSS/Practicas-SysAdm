@@ -1,5 +1,21 @@
 #!/bin/bash
 . Funciones.sh
+. config_dns.sh
+askConf() {
+    # shellcheck disable=SC2313
+    read -r -p "¿Deses continuar con la configuracion?"[s/n] cont
+    case $cont in
+    s)
+        echo "Continuando con la configuracion..."
+        setConfigDns
+        ;;
+    n)
+        echo "saliendo del script.."
+        exit 0
+        ;;
+
+    esac
+}
 while :; do
     echo "Selecciona una opcion"
     echo "1) Ver si Bind9 esta intalado"
@@ -17,23 +33,15 @@ while :; do
     2)
         echo "Validando la instalacion de bind9..."
         if isInstalled bind9 bind9-doc bind9utils; then
-            echo "Ya esta intalado"
-            read -r -p "¿Deses continuar con la configuracion?"[s/n] cont
-            case $cont in
-            s)
-                echo "Continuando con la configuracion..."
-                #llamar setConfig
-                ;;
-            n)
-                echo "saliendo del script.."
-                break
-                ;;
-
-            esac
+            echo "Los servicios de DNS ya estan instalados"
+            askConf
             continue
         else
-            echo "procediendo con la instalacion de bind9.."
+            echo "Procediendo con la instalacion de bind9.."
             getService bind9 bind9-doc bind9utils
+            echo "servicios instalados correctamente"
+            askConf
+
         fi
         ;;
     *)

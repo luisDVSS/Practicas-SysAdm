@@ -58,6 +58,18 @@ isIpFormat() {
 
     return 0
 }
+isDomName() {
+    #regex validacion de nombre de dominio
+    local regex='^(www\.)?([a-zA-Z0-9](-?[a-zA-Z0-9])*\.)+[a-zA-Z]{2,}$'
+    local nombre=$1
+    if [[ ! $nombre =~ $regex ]]; then
+        return 1
+    else
+        return 0
+
+    fi
+
+}
 isInstalled() {
     # shellcheck disable=SC2086
     if dpkg -s "$@" &>/dev/null; then
@@ -86,6 +98,28 @@ prefijo_a_mascara() {
     local mask=$((((0xFFFFFFFF << bits) & 0xFFFFFFFF)))
     intToip $mask
 }
+get() {
+    local ip="$1"
+
+    # Validar formato básico de IP
+    if [[ ! $ip =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+        return 1
+    fi
+
+    IFS='.' read -r o1 o2 o3 o4 <<<"$ip"
+
+    # Validar rango 0-255
+    for octeto in $o1 $o2 $o3 $o4; do
+        if ((octeto < 0 || octeto > 255)); then
+            return 1
+        fi
+    done
+
+    # Retornar zona inversa tipo /24
+    echo "$o3.$o2.$o1"
+    #echo "$o3.$o2.$o1.in-addr.arpa" antigua linea
+}
+
 ipToInt() {
     local IFS=.
     read -r a b c d <<<"$1"
