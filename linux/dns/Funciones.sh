@@ -94,16 +94,25 @@ isIpFormat() {
 }
 isDomName() {
     #regex validacion de nombre de dominio
-    local regex='^(www\.)?([a-zA-Z0-9](-?[a-zA-Z0-9])*\.)+[a-zA-Z]{2,}$'
+    # Solo acepta formato: nombre.com (solo letras)
+    local regex='^[a-zA-Z]+\.com$'
     local nombre=$1
-    if [[ ! $nombre =~ $regex ]]; then
-        return 1
-    else
-        return 0
 
+    if [[ $nombre =~ $regex ]]; then
+        return 0
+    else
+        return 1
     fi
 
 }
+# local regex='^(www\.)?([a-zA-Z0-9](-?[a-zA-Z0-9])*\.)+[a-zA-Z]{2,}$'
+#  local nombre=$1
+#   if [[ ! $nombre =~ $regex ]]; then
+#     return 1
+#  else
+#       return 0
+#
+#    fi
 isInstalled() {
     # shellcheck disable=SC2086
     if dpkg -s "$@" &>/dev/null; then
