@@ -33,7 +33,7 @@ function Ask-Dhcp {
     switch ($cont_dhc.ToLower()) {
         "s" {
             Write-Host "Cambiando al menu de dhcp..."
-        ..\dhcp\main.ps1"
+        ..\dhcp\main.ps1
         }
         "n" {
             Write-Host "Saliendo del script..."
