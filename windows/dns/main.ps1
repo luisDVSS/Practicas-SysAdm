@@ -5,15 +5,15 @@
 . .\config_red.ps1
 
 
-# Confirmar configuración DNS
+# Confirmar configuracion DNS
 
 function Ask-Conf {
 
-    $cont = Read-Host "¿Deseas continuar con la configuración? [s/n]"
+    $cont = Read-Host "¿Deseas continuar con la configuracion? [s/n]"
 
     switch ($cont.ToLower()) {
         "s" {
-            Write-Host "Continuando con la configuración..."
+            Write-Host "Continuando con la configuracion..."
             Set-ConfigDns
         }
         "n" {
@@ -21,7 +21,7 @@ function Ask-Conf {
             exit 0
         }
         default {
-            Write-Host "Opción no válida"
+            Write-Host "Opcion no valida"
         }
     }
 }
@@ -32,26 +32,23 @@ function Ask-Dhcp {
     switch ($cont_dhc.ToLower()) {
         "s" {
             Write-Host "Cambiando al menu de dhcp..."
-            Set-ConfigDns
+            & "$PSScriptRoot\..\dhcp\main.ps1"
         }
         "n" {
             Write-Host "Saliendo del script..."
             exit 0
         }
         default {
-            Write-Host "Opción no válida"
+            Write-Host "Opcion no valida"
         }
     }
 }
-
-
-# Menú principal
-
+function menu{
 while ($true) {
 
     Write-Host ""
-    Write-Host "Selecciona una opción"
-    Write-Host "1) Ver si el servicio DNS está instalado"
+    Write-Host "Selecciona una opcion"
+    Write-Host "1) Ver si el servicio DNS esta instalado"
     Write-Host "2) Instalar servicio DNS"
     Write-Host "3) Eliminar un dominio"
     Write-Host "4) Dominios registrados"
@@ -60,31 +57,31 @@ while ($true) {
     
     Write-Host ""
 
-    $opc = Read-Host "Opción"
+    $opc = Read-Host "Opcion"
 
     switch ($opc) {
 
       
-        # Verificar instalación DNS
+        # Verificar instalacion DNS
        
         "1" {
             if (Is-Installed "DNS") {
-                Write-Host "El servicio DNS YA está instalado."
+                Write-Host "El servicio DNS YA esta instalado."
             } else {
-                Write-Host "El servicio DNS NO está instalado."
+                Write-Host "El servicio DNS NO esta instalado."
             }
         }
 
        # Instalar DNS
      
         "2" {
-            Write-Host "Validando instalación del servicio DNS..."
+            Write-Host "Validando instalacion del servicio DNS..."
 
             if (Is-Installed "DNS") {
-                Write-Host "El servicio DNS ya está instalado."
+                Write-Host "El servicio DNS ya esta instalado."
                 Ask-Conf
             } else {
-                Write-Host "Procediendo con la instalación del servicio DNS..."
+                Write-Host "Procediendo con la instalacion del servicio DNS..."
                 Get-ServiceFeature DNS
                 Write-Host "Servicio DNS instalado correctamente."
                 Ask-Conf
@@ -98,7 +95,7 @@ while ($true) {
             if (Is-Installed "DNS") {
                 Delete-Domain
             } else {
-                Write-Host "El servicio DNS no está instalado."
+                Write-Host "El servicio DNS no esta instalado."
             }
         }
 
@@ -122,10 +119,41 @@ while ($true) {
         }
 
         # ===============================
-        # Opción inválida
+        # Opcion invalida
         # ===============================
         default {
-            Write-Host "Opción inválida"
+            Write-Host "Opcion invalida"
         }
     }
 }
+
+}
+
+
+# Menu principal
+if (-not (Test-IPStatica -Interfaz "Ethernet 2")) {
+
+    Write-Host "ERROR: El servidor debe tener IP estatica antes de instalar DNS" -ForegroundColor Red
+    $confdef = Read-Host "¿Desea aplicar una configuracion por defecto a la red interna? [s/n]"
+
+    switch ($confdef.ToLower()) {
+        "s" { 
+            Write-Host "Aplicando configuracion por defecto..."
+            Set-ConfigDefaultEthernet2
+
+            Start-Sleep -Seconds 2
+
+            if (-not (Test-IPStatica -Interfaz "Ethernet 2")) {
+                Write-Host "No se pudo aplicar la IP estatica. Abortando." -ForegroundColor Red
+                exit 1
+            }
+        }
+        default {
+            Write-Host "Saliendo del script..."
+            exit 0
+        }
+    }
+}
+
+Write-Host "Puedes continuar con la instalacion del DNS" -ForegroundColor Green
+menu

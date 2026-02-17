@@ -1,42 +1,38 @@
-# ================================
-# Importar funciones auxiliares
-# ================================
-. .\Funciones.ps1   # equivalente a: . Funciones.sh
 
-# ================================
+# Importar funciones auxiliares
+
+. .\Funciones.ps1 
+
+
 # Configurar DNS
-# ================================
+
 function Set-ConfigDns {
 
     Write-Host "Configurando DNS..."
 
-    # ============================
-    # Solicitar dominio
-    # ============================
     while ($true) {
         $dominio = Read-Host "Ingresa el nombre del dominio"
 
         if (-not (Is-DomainName $dominio)) {
-            Write-Host "Nombre de dominio no válido"
+            Write-Host "Nombre de dominio no valido"
             continue
         }
 
         if (Domain-Exists $dominio) {
-            Write-Host "Este dominio ya está agregado"
+            Write-Host "Este dominio ya esta agregado"
             continue
         }
 
         break
     }
 
-    # ============================
     # Solicitar IP
-    # ============================
+
     while ($true) {
         $ip_add = Read-Host "Ingresa la IP"
 
         if (-not (Is-HostIp $ip_add)) {
-            Write-Host "IP no válida"
+            Write-Host "IP no valida"
             continue
         }
 
@@ -53,7 +49,7 @@ function Set-ConfigDns {
                 Where-Object { $_.HostName -eq $ultimo_octeto }
 
             if ($ptr) {
-                Write-Host "Esta IP ya está registrada"
+                Write-Host "Esta IP ya esta registrada"
                 continue
             }
         } catch {
@@ -67,9 +63,9 @@ function Set-ConfigDns {
     Reset-Dns
 }
 
-# ================================
+
 # Crear zonas y registros DNS
-# ================================
+
 function Set-ConfFiles {
     param(
         [string]$Dominio,
@@ -80,15 +76,15 @@ function Set-ConfFiles {
     $ultimo_octeto = Get-Octet $Ip 4
     $zona_inversa  = "$DominioInverso.in-addr.arpa"
 
-    # ============================
+
     # Calcular NetworkId UNA vez
-    # ============================
+
     $octetos   = $Ip.Split('.')
     $networkId = "$($octetos[0]).$($octetos[1]).$($octetos[2]).0/24"
 
-    # ============================
+
     # Zona directa
-    # ============================
+
     if (-not (Domain-Exists $Dominio)) {
         Add-DnsServerPrimaryZone `
             -Name $Dominio `
@@ -96,9 +92,9 @@ function Set-ConfFiles {
             -DynamicUpdate None
     }
 
-    # ============================
+
     # Zona inversa
-    # ============================
+
     if (-not (Get-DnsServerZone -Name $zona_inversa -ErrorAction SilentlyContinue)) {
         Write-Host "Creando zona inversa $zona_inversa"
 
@@ -108,9 +104,9 @@ function Set-ConfFiles {
             -DynamicUpdate None
     }
 
-    # ============================
+  
     # Registros A
-    # ============================
+
     Add-DnsServerResourceRecordA `
         -ZoneName $Dominio `
         -Name "@" `
@@ -132,9 +128,9 @@ function Set-ConfFiles {
         -AllowUpdateAny `
         -ErrorAction SilentlyContinue
 
-    # ============================
+
     # Registro PTR (SEGURO)
-    # ============================
+
     Add-DnsServerResourceRecordPtr `
         -ZoneName $zona_inversa `
         -Name $ultimo_octeto `
