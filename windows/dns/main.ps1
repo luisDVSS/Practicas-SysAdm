@@ -1,12 +1,12 @@
-# =========================================
+
 # Importar scripts auxiliares
-# =========================================
+
 . .\Funciones.ps1
 . .\config_dns.ps1
 
-# =========================================
+
 # Confirmar configuración DNS
-# =========================================
+
 function Ask-Conf {
 
     $cont = Read-Host "¿Deseas continuar con la configuración? [s/n]"
@@ -25,10 +25,28 @@ function Ask-Conf {
         }
     }
 }
+function Ask-Dhcp {
 
-# =========================================
+    $cont_dhc = Read-Host "¿Deseas continuar al menu de dhcp? [s/n]"
+
+    switch ($cont_dhc.ToLower()) {
+        "s" {
+            Write-Host "Cambiando al menu de dhcp..."
+            Set-ConfigDns
+        }
+        "n" {
+            Write-Host "Saliendo del script..."
+            exit 0
+        }
+        default {
+            Write-Host "Opción no válida"
+        }
+    }
+}
+
+
 # Menú principal
-# =========================================
+
 while ($true) {
 
     Write-Host ""
@@ -37,16 +55,18 @@ while ($true) {
     Write-Host "2) Instalar servicio DNS"
     Write-Host "3) Eliminar un dominio"
     Write-Host "4) Dominios registrados"
-    Write-Host "5) Salir"
+    Write-Host "5) Configurar DHCP"
+    Write-Host "6) Salir"
+    
     Write-Host ""
 
     $opc = Read-Host "Opción"
 
     switch ($opc) {
 
-        # ===============================
+      
         # Verificar instalación DNS
-        # ===============================
+       
         "1" {
             if (Is-Installed "DNS") {
                 Write-Host "El servicio DNS YA está instalado."
@@ -55,9 +75,8 @@ while ($true) {
             }
         }
 
-        # ===============================
-        # Instalar DNS
-        # ===============================
+       # Instalar DNS
+     
         "2" {
             Write-Host "Validando instalación del servicio DNS..."
 
@@ -72,9 +91,9 @@ while ($true) {
             }
         }
 
-        # ===============================
+      
         # Eliminar dominio
-        # ===============================
+    
         "3" {
             if (Is-Installed "DNS") {
                 Delete-Domain
@@ -83,17 +102,21 @@ while ($true) {
             }
         }
 
-        # ===============================
+       
         # Mostrar dominios
-        # ===============================
+      
         "4" {
             Get-Domains
         }
 
-        # ===============================
+      
         # Salir
-        # ===============================
+       
         "5" {
+            Ask-Dhcp
+            
+        }
+         "6" {
             Write-Host "Saliendo..."
             break
         }
