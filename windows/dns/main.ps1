@@ -25,6 +25,7 @@ function Ask-Conf {
         }
     }
 }
+
 function Ask-Dhcp {
 
     $cont_dhc = Read-Host "¿Deseas continuar al menu de dhcp? [s/n]"
@@ -32,7 +33,7 @@ function Ask-Dhcp {
     switch ($cont_dhc.ToLower()) {
         "s" {
             Write-Host "Cambiando al menu de dhcp..."
-            & "$PSScriptRoot\..\dhcp\main.ps1"
+        ..\dhcp\main.ps1"
         }
         "n" {
             Write-Host "Saliendo del script..."
@@ -115,7 +116,7 @@ while ($true) {
         }
          "6" {
             Write-Host "Saliendo..."
-            break
+            exit 0
         }
 
         # ===============================

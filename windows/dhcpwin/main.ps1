@@ -261,9 +261,14 @@ if (-not (Test-UsableIP $ipMax $network $mascara)) {
 } until ($leaseSeconds -match '^\d+$' -and [int]$leaseSeconds -gt 0)
 
 $leaseTime = [TimeSpan]::FromSeconds([int]$leaseSeconds)
-            do {
-    $dns = Read-Host "IP DNS (ENTER para omitir)"
-} until ([string]::IsNullOrWhiteSpace($dns) -or (Test-ValidIP $dns))
+            #input de de dns
+do {
+    $dns = Read-Host "IP DNS (No Omitible)"
+    #si esta vacia se le añade la ip del sv
+    if ([string]::IsNullOrWhiteSpace($dns)) {
+        $dns=$serverIP
+    }
+} until ((Test-ValidIP $dns))
             do {
     $gw = Read-Host "Gateway (ENTER para omitir)"
 } until ([string]::IsNullOrWhiteSpace($gw) -or (Test-ValidIP $gw))

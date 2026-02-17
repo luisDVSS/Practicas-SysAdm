@@ -173,8 +173,10 @@ done
 #validacion DNS---------
 while :; do
 read -p "IP del servidor DNS: " ip_dns
+#validacion de si eta vacio
  if [ -z "$ip_dns" ]; then
- echo "Haz dejado el dns vacio"
+ echo "Haz dejado el dns en blanco, se le asignara la ip por defecto: $ip_mas"
+ ip_dns="$ip_mas"
 	break
  else
  	if valid_ip "$ip_dns"; then
@@ -184,7 +186,6 @@ read -p "IP del servidor DNS: " ip_dns
 	 	echo "[AVISO] IP Invalida"
  	fi
  fi
- 
 done
 #Validacion Gateway
 while :; do
