@@ -266,7 +266,7 @@ do {
     $dns = Read-Host "IP DNS (en blanco=$serverIP)"
     #si esta vacia se le añade la ip del sv
     if ([string]::IsNullOrWhiteSpace($dns)) {
-        dns="$serverIP"
+        $dns="$serverIP"
     }
 } until ((Test-ValidIP $dns))
             do {
@@ -286,7 +286,7 @@ if (-not [string]::IsNullOrWhiteSpace($gw)) {
 }
 
 if (-not [string]::IsNullOrWhiteSpace($dns)) {
-    Set-DhcpServerv4OptionValue -DnsServer $dns
+    Set-DhcpServerv4OptionValue -DnsServer $dns -Force
     Write-Host "Configurando DNS..."
     Set-DnsClientServerAddress `
     -InterfaceAlias $interfaz `
