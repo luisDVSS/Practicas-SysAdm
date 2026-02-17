@@ -266,7 +266,7 @@ do {
     $dns = Read-Host "IP DNS (en blanco=$serverIP)"
     #si esta vacia se le añade la ip del sv
     if ([string]::IsNullOrWhiteSpace($dns)) {
-        $dns=$serverIP
+        dns="$serverIP"
     }
 } until ((Test-ValidIP $dns))
             do {
