@@ -1,9 +1,9 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-. .\validip.ps1
-. .\conf_red.ps1
-. .\monitor.ps1
-. .\validsegmn.ps1
+. "$PSScriptRoot\validip.ps1"
+. "$PSScriptRoot\conf_red.ps1"
+. "$PSScriptRoot\monitor.ps1"
+. "$PSScriptRoot\validsegmn.ps1"
 Write-Host "DEBUG: imports OK"
 Read-Host "ENTER para continuar"
 function Valid-InstDHCP {

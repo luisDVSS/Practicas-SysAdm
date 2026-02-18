@@ -1,9 +1,8 @@
 
 # Importar scripts auxiliares
 
-. .\Funciones.ps1
-. .\config_red.ps1
-
+. "$PSScriptRoot\Funciones.ps1"
+. "$PSScriptRoot\config_red.ps1"
 
 # Confirmar configuracion DNS
 
@@ -33,7 +32,7 @@ function Ask-Dhcp {
     switch ($cont_dhc.ToLower()) {
         "s" {
             Write-Host "Cambiando al menu de dhcp..."
-        ..\dhcpwin\main.ps1
+        & "$PSScriptRoot\..\dhcpwin\main.ps1"
         }
         "n" {
             Write-Host "Saliendo del script..."
