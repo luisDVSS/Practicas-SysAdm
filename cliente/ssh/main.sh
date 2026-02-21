@@ -11,6 +11,10 @@ if ! validacion_servicio openssh-client; then
         systemctl start ssh
     fi
 fi
-echo "Configurando Interfaz a usar en ssh"
-config_redsv enp0s9 192.168.99.15 24
+if ! validar_interfaz enp0s9; then
+    echo "Configurando Interfaz a usar en ssh"
+    config_redsv enp0s9 192.168.99.15 24
+fi
+echo "Terminando configuracion.."
+sleep 4
 conecTo luisd 192.168.99.10

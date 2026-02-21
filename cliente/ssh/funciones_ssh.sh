@@ -58,3 +58,33 @@ EOF
     echo "Configuracion del servidor aplicada correctamente :D"
 
 }
+validar_interfaz() {
+    echo "Validando que la interfaz exista"
+    local interfaz="$1"
+
+    if [[ -z "$interfaz" ]]; then
+        echo "La interfaz no existe"
+        return 1
+    fi
+
+    # Verificar que la interfaz exista
+    if ! ip link show "$interfaz" &>/dev/null; then
+        echo "La interfaz $interfaz no existe."
+        return 1
+    fi
+
+    # Verificar que esté UP
+    if ! ip link show "$interfaz" | grep -q "state UP"; then
+        echo "La interfaz $interfaz está DOWN."
+        return 1
+    fi
+
+    # Verificar que tenga IP asignada
+    if ! ip -4 addr show "$interfaz" | grep -q "inet "; then
+        echo "La interfaz $interfaz no tiene IP asignada."
+        return 1
+    fi
+
+    echo "La interfaz $interfaz está activa y con IP configurada."
+    return 0
+}
