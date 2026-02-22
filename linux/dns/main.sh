@@ -55,13 +55,13 @@ while :; do
         echo "Validando la instalacion de bind9..."
         if isInstalled bind9 bind9-doc bind9utils; then
             echo "Los servicios de DNS ya estan instalados"
-            askDhcp
+            #askDhcp
             continue
         else
             echo "Procediendo con la instalacion de bind9.."
             getService bind9 bind9-doc bind9utils
             echo "servicios instalados correctamente"
-            askDhcp
+            #askDhcp
             continue
         fi
         ;;

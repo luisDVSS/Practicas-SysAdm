@@ -11,13 +11,13 @@ while :; do
     read -r opc
     case "$opc" in
     1)
-        source "$SCRIPT_DIR/dhcp/main.sh"
+        sudo "$SCRIPT_DIR/dhcp/main.sh"
         ;;
     2)
-        source "$SCRIPT_DIR/dns/main.sh"
+        sudo "$SCRIPT_DIR/dns/main.sh"
         ;;
     3)
-        source "$SCRIPT_DIR/ssh/main.sh"
+        sudo "$SCRIPT_DIR/ssh/main.sh"
         ;;
     esac
 
