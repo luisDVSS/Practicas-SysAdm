@@ -1,8 +1,4 @@
 #!/bin/bash
-getService() {
-    apt install -y "$@" &>/dev/null
-}
-
 getDomains() {
     local conf="/etc/bind/named.conf.local"
 
@@ -36,62 +32,6 @@ getDomains() {
     ' "$conf"
 }
 
-isHostIp() {
-    local ip="$1"
-
-    # Validar formato general
-    if [[ ! $ip =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
-        return 1
-    fi
-
-    # Separar octetos
-    IFS='.' read -r o1 o2 o3 o4 <<<"$ip"
-
-    # Validar rango 0-255 en cada octeto
-    for octeto in $o1 $o2 $o3 $o4; do
-        if ((octeto < 0 || octeto > 255)); then
-            return 1
-        fi
-    done
-
-    # IPs no permitidas explícitamente
-    if [[ "$ip" == "0.0.0.0" ||
-        "$ip" == "1.0.0.0" ||
-        "$ip" == "127.0.0.0" ||
-        "$ip" == "127.0.0.1" ||
-        "$ip" == "255.255.255.255" ]]; then
-        return 1
-    fi
-
-    # Bloquear 0.x.x.x
-    if ((o1 == 0)); then
-        return 1
-    fi
-
-    return 0
-}
-#validacion debil
-#validacion de formato y
-isIpFormat() {
-    local ip="$1"
-
-    # Validar estructura básica X.X.X.X
-    if [[ ! $ip =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
-        return 1
-    fi
-
-    # Separar octetos
-    IFS='.' read -r o1 o2 o3 o4 <<<"$ip"
-
-    # Validar rango 0-255
-    for octeto in "$o1" "$o2" "$o3" "$o4"; do
-        if ((octeto < 0 || octeto > 255)); then
-            return 1
-        fi
-    done
-
-    return 0
-}
 isDomName() {
     #regex validacion de nombre de dominio
     # Solo acepta formato: nombre.com (solo letras)
@@ -104,42 +44,6 @@ isDomName() {
         return 1
     fi
 
-}
-# local regex='^(www\.)?([a-zA-Z0-9](-?[a-zA-Z0-9])*\.)+[a-zA-Z]{2,}$'
-#  local nombre=$1
-#   if [[ ! $nombre =~ $regex ]]; then
-#     return 1
-#  else
-#       return 0
-#
-#    fi
-isInstalled() {
-    # shellcheck disable=SC2086
-    if dpkg -s "$@" &>/dev/null; then
-        return 0
-    else
-        return 1
-    fi
-}
-isInt() {
-    [[ "$1" =~ ^[0-9]+$ ]]
-}
-isSameSegment() {
-    ip1=$(ipToint "$1")
-    ip2=$(ipToint "$2")
-    mask=$(ipToint "$3")
-    if (((ip1 & mask) == (ip2 & mask))); then
-        return 0
-    else
-        return 1
-    fi
-}
-prefijo_a_mascara() {
-    local prefijo=$1
-    local bits=$((32 - prefijo))
-    # shellcheck disable=SC2323
-    local mask=$((((0xFFFFFFFF << bits) & 0xFFFFFFFF)))
-    intToip $mask
 }
 getZonaInversa() {
     local ip="$1"
@@ -163,12 +67,6 @@ getZonaInversa() {
     #echo "$o3.$o2.$o1.in-addr.arpa" antigua linea
 }
 
-ipToInt() {
-    local IFS=.
-    read -r a b c d <<<"$1"
-    # shellcheck disable=SC2323
-    echo $((((a << 24) | (b << 16) | (c << 8) | d)))
-}
 resetBind() {
     systemctl restart bind9
 }

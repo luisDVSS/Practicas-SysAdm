@@ -1,5 +1,6 @@
 #!/bin/bash
-. Funciones.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/Funciones.sh"
 setConfigDns() {
     echo "Configurando dns.."
     while :; do

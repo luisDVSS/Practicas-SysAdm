@@ -1,84 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-source "$SCRIPT_DIR/validip.sh"
-source "$SCRIPT_DIR/conf_red.sh"
 source "$SCRIPT_DIR/monitor.sh"
-source "$SCRIPT_DIR/valid_segm.sh"
-#validacion para ver si dhcp ya esta instalado
-valid_inst() {
- if dpkg -s isc-dhcp-server &>/dev/null; then
-	 return 0
- else
-	 return 1
- fi
-}
-#funcion para validar la existencia de una interfaz
-valid_interfaz() {
-local iface="$1"
- if ip link show "$iface" &>/dev/null; then
-	 return 0
- else
-	 return 1
- fi
+source "$SCRIPT_DIR/../lib_func.sh"
 
-}
-valid_conf_ya(){
- systemctl is-active --quiet isc-dhcp-server || return 1
- return 0
-}
-intToip() {
- local ip=$1
- echo "$(( (ip>>24)&255 )).$(( (ip>>16)&255 )).$(( (ip>>8)&255 )).$(( ip&255 ))"
-}
 conf_ipsv() {
  ip_int=$(ipToint "$1") || exit 1
  ip_mas=$(intToip $((ip_int + 1)))
  local prefis=$3
- config_redsv $2 $ip_mas $prefis
-}
-dhcp_status() {
-systemctl restart isc-dhcp-server
-systemctl enable isc-dhcp-server
-echo "DHCP server configurado y activo"
-
-}
-validar_ip_network() {
-    local ip="$1"
-    local prefijo="$2"
-
-    # Separar octetos y validar rango
-    IFS='.' read -r o1 o2 o3 o4 <<< "$ip"
-    for octeto in $o1 $o2 $o3 $o4; do
-        if ((octeto < 0 || octeto > 255)); then
-            return 1
-        fi
-    done
-
-    # Bloquear redes inválidas comunes
-    if [[ "$ip" == "0.0.0.0" ]] || ((o1 == 127)); then
-        return 1
-    fi
-
-    # Convertir a entero
-    local ip_int=$(ipToint "$ip")
-    local mask=$(( 0xFFFFFFFF << (32 - prefijo) & 0xFFFFFFFF ))
-
-    #Calcular network real
-    local network=$(( ip_int & mask ))
-
-    #Verificar que la IP sea exactamente la network
-    if (( ip_int == network )); then
-        return 0
-    else
-        return 1
-    fi
-}
-
-prefijo_a_mascara() {
-    local prefijo=$1
-    local mask=$(( 0xFFFFFFFF << (32 - prefijo) & 0xFFFFFFFF ))
-    intToip $mask
+ setLocalRed $2 $ip_mas $prefis
 }
 config_dhcp() {
 #validacion de INTERFAZ 
@@ -128,7 +57,7 @@ while :; do
 	while :; do
 		echo "[RANGO]Ingresa IP minima: "
 		read ip_min
-		if valid_ip "$ip_min"; then
+		if isHostIp "$ip_min"; then
 			echo "IP VALIDA..."
 			break
 		else
@@ -139,7 +68,7 @@ while :; do
 	while :; do
 		echo "[RANGO]Ingresa IP Maxima: "
 		read ip_max
-		if valid_ip "$ip_max"; then
+		if isHostIp "$ip_max"; then
 			echo "IP VALIDA..."
 			break
 		else
@@ -158,7 +87,7 @@ while :; do
 		echo "IP de network y servidor fuera del rango del servicio: CORRECTO"
 		echo "Validando segmentacion coherente.."
 
-	       	if mismo_segmentos $ip_min $ip_mas $mascara; then 
+	       	if isSameSegment $ip_min $ip_mas $mascara; then 
 			echo "El rango si esta dentro del segmento"
 		       	break
 	       	else
@@ -179,7 +108,7 @@ read -p "IP del servidor DNS: " ip_dns
  ip_dns="$ip_mas"
 	break
  else
- 	if valid_ip "$ip_dns"; then
+ 	if isHostIp "$ip_dns"; then
 	 	echo "IP del dns Valida..."
 	 	break
 	 else
@@ -194,10 +123,10 @@ while :; do
 	echo "has dejado la puerta de enlace vacia, procediendo"
 	break
 	else
-	if valid_ip "$puerta"; then
+	if isHostIp "$puerta"; then
 		echo "IP de la puerta de enlace valida..."
 		echo "validando que este en el segmento de red correcto.."
-		if mismo_segmentos "$puerta" "$network" "$mascara"; then 
+		if isSameSegment "$puerta" "$network" "$mascara"; then 
 			echo "La puerta si esta dentro del segmento"
 		       	break
 	       	else
@@ -260,17 +189,7 @@ echo "}" >> /etc/dhcp/dhcpd.conf
 
 dhcp_status
 }
-#INSTALACION DHCP
-instal_dhcp() {
-	echo "Instalando isc-dhcp-serer..."
-	apt update -y >/dev/null 2>&1
-	apt install -y isc-dhcp-server >/dev/null 2>&1 || {
-	       	echo "[ERROR] No se pudo instalar isc-dhcp-server"; 
-		echo "[AVISO] Comprueba tu conexion a internet";
-	       	return 1
-	}
-	return 0
-}
+
 #MAIN PROGRAM ----------------------------------------------
 while :; do
 echo "==========MENU->> ACCIONES A REALIZAR=========="
@@ -282,10 +201,10 @@ read selected
 case $selected in
 	1)
 		echo "1"
-		if valid_inst; then
+		if isInstalled; then
 			echo "[AVISO] Ya cuentas con la instalacion de-> 'isc-dhcp-server'"
 			echo "validando si ya hay una configuracion de dhcp-server..."
-			if valid_conf_ya; then
+			if valid_conf_ya isc-dhcp-server; then
 				read -p "[AVISO] Ya cuentas con con una configuracion de isc-dhcp-server, deseas SOBRE-ESCRIBIRLA? [s/n]" sobrescribir
 				case $sobrescribir in
 					s)
@@ -323,7 +242,7 @@ case $selected in
 		else
               		echo "No cuentas con la previa instalacion de isc-dhcp-server"
 			echo "Procediendo a la instalacion..."
-			if ! instal_dhcp; then
+			if ! getService isc-dhcp-server; then
 				echo "[ERROR] INSTALACION FALLIDA"
 				echo "saliendo...."
 				exit 1

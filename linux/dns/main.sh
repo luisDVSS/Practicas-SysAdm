@@ -3,6 +3,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "$SCRIPT_DIR/Funciones.sh"
 source "$SCRIPT_DIR/config_dns.sh"
+source "$SCRIPT_DIR/../lib_func.sh"
 askDhcp() {
     read -r -p "¿Configurar o entrar al modulo de DHCP?[s/n]" cont
     case $cont in
