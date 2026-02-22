@@ -13,7 +13,7 @@ config_dhcp() {
 #validacion de INTERFAZ 
 while :; do
 	read -p "Ingresa la interfaz de red: " interfaz
-	if ! valid_interfaz $interfaz; then
+	if ! valid_exist_interfaz $interfaz; then
 		echo "[AVISO]Interfaz no existente, termina la configuracion de virtual box y vuelve :D"
 		exit 1
 	fi

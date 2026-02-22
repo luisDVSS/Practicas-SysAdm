@@ -54,7 +54,16 @@ EOF
     echo "Configuracion del servidor aplicada correctamente :D"
 
 }
+valid_exist_interfaz() {
+    echo "Validando que la interfaz exista"
+    local interfaz="$1"
 
+    if [[ -z "$interfaz" ]]; then
+        echo "La interfaz no existe"
+        return 1
+    fi
+    return 0
+}
 valid_interfaz() {
     echo "Validando que la interfaz exista"
     local interfaz="$1"
