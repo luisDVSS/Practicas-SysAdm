@@ -18,16 +18,19 @@ while ($true) {
     switch ($opc) {
 
         "1" {
-            & "$SCRIPT_DIR\dhcp\main.ps1"
+                   & (Join-Path $SCRIPT_DIR "dhcp\main.ps1")
+
             
         }
 
         "2" {
-            & "$SCRIPT_DIR\dns\main.ps1"
+                   & (Join-Path $SCRIPT_DIR "dns\main.ps1")
+
         }
 
         "3" {
-           & "$SCRIPT_DIR\ssh\main.ps1"
+                  & (Join-Path $SCRIPT_DIR "ssh\main.ps1")
+
         }
 
         default {
