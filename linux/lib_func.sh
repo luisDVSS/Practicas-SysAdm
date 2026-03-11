@@ -11,8 +11,13 @@ isInstalled() {
 }
 getService() {
     echo "Instalando..-"
-    apt update -y "$@" &>/dev/null
-    apt install -y "$@" &>/dev/null
+    apt update
+    if ! apt install -y "$@"; then
+        echo "[ERROR] Falló la instalación de: $*" >&2
+        return 1
+    fi
+    echo "[OK] Paquete(s) instalado(s): $*"
+    return 0
 }
 
 isRoot() {

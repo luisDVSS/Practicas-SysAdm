@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-
-
-
 setGrupos() {
   ###CREACION DE GRUPOS
   if ! getent group "Reprobados" >/dev/null; then
