@@ -79,7 +79,7 @@ case "$opc" in
     read -p "Nuevo puerto: " nuevo_puerto
     case "$servicio" in
     1)
-        set_puerto_apache $nuevo_puerto
+        set_puerto_apache2 $nuevo_puerto
         ;;
     2)
         set_puerto_nginx $nuevo_puerto
