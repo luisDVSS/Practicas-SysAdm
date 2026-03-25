@@ -1,0 +1,45 @@
+<AppLockerPolicy Version="1">
+  <RuleCollection Type="Exe" EnforcementMode="Enabled">
+
+    <FilePathRule Id="921cc481-6e17-4653-8f75-050b80acca20"
+      Name="Permitir todos en Program Files"
+      Description="Permite ejecucion de programas en Program Files"
+      Action="Allow" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <FilePathRule Id="a61c8b2c-a319-4cd0-9690-d2177cad7b51"
+      Name="Permitir todos en Windows"
+      Description="Permite ejecucion de programas en el directorio de Windows"
+      Action="Allow" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <FilePathRule Id="fd686d83-a829-4351-8ff4-27c7de5755d2"
+      Name="Permitir Administradores"
+      Description="Permite a administradores ejecutar cualquier programa"
+      Action="Allow" UserOrGroupSid="S-1-5-32-544">
+      <Conditions>
+        <FilePathCondition Path="*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <FileHashRule Id="b2c3d4e5-f6a7-8901-bcde-f12345678901"
+      Name="Bloquear Notepad"
+      Description="Bloqueo del ejecutable notepad.exe con su hash"
+      Action="Deny" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256"
+            Data="0xF9D9B9DED9A67AA3CFDBD5002F3B524B265C4086C188E1BE7C936AB25627BF01"
+            SourceFileName="notepad.exe"/>
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+
+  </RuleCollection>
+</AppLockerPolicy>

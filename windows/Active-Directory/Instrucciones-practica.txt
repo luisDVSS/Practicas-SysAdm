@@ -1,0 +1,25 @@
+Esta práctica sólo tendrá un server (windows), se tendrán dos clientes que se unirán al dominio, uno windows y otro linux.
+Enfoque: Gestión de Recursos y Restricción del Entorno Operativo mediante Objetos de Directiva de Grupo (Group Policy Objects - GPO) y el Administrador de Recursos del Servidor de Archivos (File Server Resource Manager - FSRM).
+Objetivo de la Actividad
+El estudiante implementará políticas de gobernanza de datos y control de ejecución de software. El reto consiste en automatizar la restricción de acceso por horarios y la gestión de cuotas de disco estrictas vinculadas a los perfiles de usuario, asegurando que el servidor autogestione sus recursos de almacenamiento.
+Actividades
+Estructura Organizativa Dinámica: Creación de las UO Cuates y No Cuates.
+El script debe leer un archivo CSV con una lista de 10 usuarios y distribuirlos automáticamente en las UO basándose en un atributo del CSV (ej. Departamento).
+Unión al Dominio:
+Windows: Unión automática mediante Add-Computer.
+Linux: Script en Bash que instale realmd, sssd y adcli. Debe configurar /etc/sssd/sssd.conf para que el atributo fallback_homedir sea /home/%u@%d y permitir que los usuarios de AD tengan permisos de sudo mediante la edición automática de /etc/sudoers.d/ad-admins.
+Control de Acceso Temporal (Logon Hours):
+Configurar el Grupo 1 -cuates- (8:00 AM - 3:00 PM) y Grupo 2 -no cuates- (3:00 PM - 2:00 AM).
+El script de PowerShell debe aplicar una Directiva de Grupo (Group Policy Object - GPO) de "Seguridad de red: cerrar la sesión de los usuarios cuando expire el tiempo de inicio de sesión", obligando al sistema a cerrar la sesión activa del usuario al cumplirse su horario.
+Gestión de Almacenamiento Estricto (FSRM):
+Implementar cuotas de 5 MB y 10 MB por usuario utilizando el Administrador de Recursos del Servidor de Archivos (FSRM). La cuota de 5 MB será para los usuarios del grupo no cuates, y la cuota de 10 MB será para el grupo de cuates.
+Configurar un Apantallamiento de Archivos (Active Screening) dinámico. El script debe prohibir que los usuarios guarden archivos con extensiones multimedia (.mp3, .mp4) o ejecutables (.exe, .msi) en sus carpetas personales.
+Control de Ejecución con AppLocker:
+Crear reglas de ejecución: El Grupo 1 tiene permitido el Bloc de Notas; el Grupo 2 lo tiene bloqueado por regla de Hash (resumen criptográfico) para evitar que, al renombrar el ejecutable, puedan saltarse la restricción.
+Unión al Dominio:
+Windows: Unión automática mediante Add-Computer.
+Linux: Script en Bash que instale realmd, sssd y adcli. Debe configurar /etc/sssd/sssd.conf para que el atributo fallback_homedir sea /home/%u@%d y permitir que los usuarios de AD tengan permisos de sudo mediante la edición automática de /etc/sudoers.d/ad-admins.
+Herramientas y Comandos Críticos
+Active Directory PowerShell: Set-ADUser -LogonHours (requiere conversión de horario a un arreglo de bytes).
+Módulo FSRM: New-FsrmQuota, New-FsrmFileGroup, New-FsrmFileScreen.
+AppLocker: Get-AppLockerFileInformation y Set-AppLockerPolicy.

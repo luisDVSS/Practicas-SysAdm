@@ -12,10 +12,10 @@ function Set-ConfigDns {
     while ($true) {
         $dominio = Read-Host "Ingresa el nombre del dominio"
 
-        if (-not (Is-DomainName $dominio)) {
-            Write-Host "Nombre de dominio no valido"
-            continue
-        }
+        # if (-not (Is-DomainName $dominio)) {
+        #     Write-Host "Nombre de dominio no valido"
+        #     continue
+        # }
 
         if (Domain-Exists $dominio) {
             Write-Host "Este dominio ya esta agregado"
@@ -123,6 +123,13 @@ function Set-ConfFiles {
     Add-DnsServerResourceRecordA `
         -ZoneName $Dominio `
         -Name "www" `
+        -IPv4Address $Ip `
+        -AllowUpdateAny `
+        -ErrorAction SilentlyContinue
+
+    Add-DnsServerResourceRecordA `
+        -ZoneName $Dominio `
+        -Name "local" `
         -IPv4Address $Ip `
         -AllowUpdateAny `
         -ErrorAction SilentlyContinue
