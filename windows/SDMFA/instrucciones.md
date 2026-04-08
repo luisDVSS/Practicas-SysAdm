@@ -1,8 +1,16 @@
-
+## INSTRUCCIONES 
 Enfoque: Endurecimiento (Hardening) del Directorio Activo (Active Directory - AD), Auditoría de Eventos y Autenticación de Múltiples Factores (Multi-Factor Authentication - MFA).
 Objetivo de la Actividad
 Elevar el nivel de seguridad del dominio mediante la implementación de un modelo de Control de Acceso Basado en Roles (Role-Based Access Control - RBAC) y una capa de Autenticación de Múltiples Factores (Multi-Factor Authentication - MFA). El estudiante deberá demostrar su capacidad para orquestar la seguridad administrativa, auditar cambios críticos en el sistema y proteger el acceso al servidor mediante factores de autenticación dinámicos.
 Actividades 
+>[!INFO]
+>
+>
+>
+>
+>
+
+
 1. Delegación de Control y RBAC (Roles Específicos)
 Configuración: Crear 4 usuarios de administración delegada para tareas específicas dentro del Directorio Activo (Active Directory - AD).
 Configurar permisos granulares mediante Listas de Control de Acceso (Access Control Lists - ACL) en los contenedores de AD.

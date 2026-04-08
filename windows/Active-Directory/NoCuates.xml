@@ -1,42 +1,132 @@
 <AppLockerPolicy Version="1">
+  <RuleCollection Type="Appx" EnforcementMode="Enabled">
+<FilePublisherRule Id="b9e18c21-ff8f-43cf-b9fc-db40eed693ba"
+  Name="Permitir todas las apps empaquetadas"
+  Description=""
+  Action="Allow" UserOrGroupSid="S-1-1-0">
+  <Conditions>
+    <FilePublisherCondition PublisherName="*"
+      ProductName="*" BinaryName="*">
+      <BinaryVersionRange LowSection="*" HighSection="*"/>
+    </FilePublisherCondition>
+  </Conditions>
+</FilePublisherRule>
+  <FilePublisherRule Id="a9e18c21-ff8f-43cf-b9fc-db40eed693ba"
+    Name="Permitir todas las apps firmadas por Microsoft"
+    Description=""
+    Action="Allow" UserOrGroupSid="S-1-1-0">
+    <Conditions>
+      <FilePublisherCondition PublisherName="O=MICROSOFT CORPORATION, L=REDMOND, S=WASHINGTON, C=US"
+        ProductName="*" BinaryName="*">
+        <BinaryVersionRange LowSection="*" HighSection="*"/>
+      </FilePublisherCondition>
+    </Conditions>
+  </FilePublisherRule>
+</RuleCollection>
+
+  <RuleCollection Type="Dll" EnforcementMode="NotConfigured"/>
+  <RuleCollection Type="Msi" EnforcementMode="NotConfigured"/>
+  <RuleCollection Type="Script" EnforcementMode="NotConfigured"/>
+
   <RuleCollection Type="Exe" EnforcementMode="Enabled">
 
-    <FilePathRule Id="921cc481-6e17-4653-8f75-050b80acca20"
-      Name="Permitir todos en Program Files"
-      Description="Permite ejecucion de programas en Program Files"
-      Action="Allow" UserOrGroupSid="S-1-1-0">
-      <Conditions>
-        <FilePathCondition Path="%PROGRAMFILES%\*"/>
-      </Conditions>
-    </FilePathRule>
-
-    <FilePathRule Id="a61c8b2c-a319-4cd0-9690-d2177cad7b51"
-      Name="Permitir todos en Windows"
-      Description="Permite ejecucion de programas en el directorio de Windows"
-      Action="Allow" UserOrGroupSid="S-1-1-0">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\*"/>
-      </Conditions>
-    </FilePathRule>
-
+    <!-- Administradores: acceso total -->
     <FilePathRule Id="fd686d83-a829-4351-8ff4-27c7de5755d2"
       Name="Permitir Administradores"
-      Description="Permite a administradores ejecutar cualquier programa"
+      Description=""
       Action="Allow" UserOrGroupSid="S-1-5-32-544">
       <Conditions>
         <FilePathCondition Path="*"/>
       </Conditions>
     </FilePathRule>
 
-    <FileHashRule Id="b2c3d4e5-f6a7-8901-bcde-f12345678901"
-      Name="Bloquear Notepad"
-      Description="Bloqueo del ejecutable notepad.exe con su hash"
-      Action="Deny" UserOrGroupSid="S-1-1-0">
+    <!-- Rutas del sistema necesarias para Windows -->
+    <FilePathRule Id="a1000003-0000-0000-0000-000000000003"
+      Name="Permitir Program Files"
+      Description=""
+      Action="Allow" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <FilePathRule Id="a1000004-0000-0000-0000-000000000004"
+      Name="Permitir Program Files x86"
+      Description=""
+      Action="Allow" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES(X86)%\*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <FilePathRule Id="a1000001-0000-0000-0000-000000000001"
+      Name="Permitir System32"
+      Description=""
+      Action="Allow" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FilePathCondition Path="%SYSTEM32%\*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <!-- %WINDIR%\* cubre explorer.exe, SysWOW64, login, etc. -->
+    <FilePathRule Id="a2000003-0000-0000-0000-000000000003"
+      Name="Permitir WINDIR completo"
+      Description=""
+      Action="Allow" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <!-- Buscador de Windows y apps modernas -->
+    <FilePathRule Id="c1000001-0000-0000-0000-000000000001"
+      Name="Permitir SystemApps"
+      Description=""
+      Action="Allow" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\SystemApps\*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <!-- Apps modernas (Store, etc.) -->
+    <FilePathRule Id="c1000002-0000-0000-0000-000000000002"
+      Name="Permitir WindowsApps"
+      Description=""
+      Action="Allow" UserOrGroupSid="S-1-1-0">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\WindowsApps\*"/>
+      </Conditions>
+    </FilePathRule>
+
+    <!-- BLOQUEOS de Notepad solo para el grupo NoCuates -->
+    <FilePathRule Id="d0000001-0000-0000-0000-000000000001"
+      Name="Bloquear Notepad System32"
+      Description=""
+      Action="Deny" UserOrGroupSid="S-1-5-21-844394367-187096619-1264955401-1108">
+      <Conditions>
+        <FilePathCondition Path="%SYSTEM32%\notepad.exe"/>
+      </Conditions>
+    </FilePathRule>
+
+    <FilePathRule Id="d0000003-0000-0000-0000-000000000003"
+      Name="Bloquear Notepad raiz Windows"
+      Description=""
+      Action="Deny" UserOrGroupSid="S-1-5-21-844394367-187096619-1264955401-1108">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\notepad.exe"/>
+      </Conditions>
+    </FilePathRule>
+
+    <FileHashRule Id="d0000002-0000-0000-0000-000000000002"
+      Name="Bloquear Notepad por hash"
+      Description=""
+      Action="Deny" UserOrGroupSid="S-1-5-21-844394367-187096619-1264955401-1108">
       <Conditions>
         <FileHashCondition>
           <FileHash Type="SHA256"
             Data="0xF9D9B9DED9A67AA3CFDBD5002F3B524B265C4086C188E1BE7C936AB25627BF01"
-            SourceFileName="notepad.exe"/>
+            SourceFileName="notepad.exe"
+            SourceFileLength="201216"/>
         </FileHashCondition>
       </Conditions>
     </FileHashRule>

@@ -22,44 +22,56 @@ function promoverServidor{
 
 $global:usuarios = Import-Csv -Path "$PSScriptRoot\usuarios.csv"
 #se ejcuta primero que la 'crearGPOS'
-function crearOU{
+function crearOU {
     if (-not (Get-ADOrganizationalUnit -Filter {Name -eq "Cuates"})) {
         New-ADOrganizationalUnit -Name "Cuates" -Path "DC=empresa,DC=local" -Description "Personal de cuates"
-      }
-
+    }
     if (-not (Get-ADOrganizationalUnit -Filter {Name -eq "NoCuates"})) {
-        New-ADOrganizationalUnit -Name "NoCuates" -Path "DC=empresa,DC=local" -Description "Peronal de NoCuates"
-      }
-  }
+        New-ADOrganizationalUnit -Name "NoCuates" -Path "DC=empresa,DC=local" -Description "Personal de NoCuates"
+    }
+
+    # AGREGAR ESTO:
+    if (-not (Get-ADGroup -Filter {Name -eq "Cuates"} -ErrorAction SilentlyContinue)) {
+        New-ADGroup -Name "Cuates" -GroupScope Global -GroupCategory Security -Path "OU=Cuates,DC=empresa,DC=local"
+    }
+    if (-not (Get-ADGroup -Filter {Name -eq "NoCuates"} -ErrorAction SilentlyContinue)) {
+        New-ADGroup -Name "NoCuates" -GroupScope Global -GroupCategory Security -Path "OU=NoCuates,DC=empresa,DC=local"
+    }
+}
 
 function crearGPOS{
   New-GPO -Name "GPO-HorarioCuates"
   New-GPO -Name "GPO-HorarioNoCuates"
 }
 function setRulesGpos{
- $xmlCuates   = "$PSScriptRoot\Cuates.xml"
+    $xmlCuates   = "$PSScriptRoot\Cuates.xml"
     $xmlNoCuates = "$PSScriptRoot\NoCuates.xml"
 
-    # Meter los XMLs directo en cada GPO via LDAP
     Set-AppLockerPolicy -XmlPolicy $xmlCuates `
         -Ldap "LDAP://CN={$((Get-GPO -Name 'GPO-HorarioCuates').Id)},CN=Policies,CN=System,DC=empresa,DC=local"
 
     Set-AppLockerPolicy -XmlPolicy $xmlNoCuates `
         -Ldap "LDAP://CN={$((Get-GPO -Name 'GPO-HorarioNoCuates').Id)},CN=Policies,CN=System,DC=empresa,DC=local"
+
+    # Aplicar también localmente en cada cliente via GPO script
+    # o forzar gpupdate en clientes
+    # Invoke-Command -ComputerName DESKTOP-2RPEA3I -Credential empresa\Administrador -ScriptBlock {
+    #     gpupdate /force
+    # }
 }
 function configGPOcuates{
-  Set-GPRegistryValue -Name "GPO-HorarioCuates" -key "HKLM\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters" -ValueName "EnableForcedLogOff" -Value 1 -Type DWord
-  
+  Set-GPRegistryValue -Name "GPO-HorarioCuates" -Key "HKLM\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters" -ValueName "EnableForcedLogOff" -Value 1 -Type DWord
+
   Set-GPRegistryValue -Name "GPO-HorarioCuates" `
-        -Key "HKLM\SYSTEM\CurrentControlSet\Services\AppIDSvc" `
+        -Key "HKLM\SYSTEM\ControlSet001\Services\AppIDSvc" `
         -ValueName "Start" -Value 2 -Type DWord
 }
 
 function configGPONocuates{
-  Set-GPRegistryValue -Name "GPO-HorarioNoCuates" -key "HKLM\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters" -ValueName "EnableForcedLogOff" -Value 1 -Type DWord
-  
+  Set-GPRegistryValue -Name "GPO-HorarioNoCuates" -Key "HKLM\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters" -ValueName "EnableForcedLogOff" -Value 1 -Type DWord
+
   Set-GPRegistryValue -Name "GPO-HorarioNoCuates" `
-        -Key "HKLM\SYSTEM\CurrentControlSet\Services\AppIDSvc" `
+        -Key "HKLM\SYSTEM\ControlSet001\Services\AppIDSvc" `
         -ValueName "Start" -Value 2 -Type DWord
 }
 function linkearGPOS{
@@ -106,6 +118,7 @@ $bytesNoCuates = [byte[]](
 
     #creacion de los usuario
     New-ADUser -Name $usuario.nombre -SamAccountName $usuario.accountName -AccountPassword (ConvertTo-SecureString $usuario.password -AsPlainText -Force) -Path $ou -Enabled $true
+Add-ADGroupMember -Identity $usuario.depto -Members $usuario.accountName
     #seteo de los horarios segun su grupo o depto
     Set-ADUser -Identity $usuario.accountName -Replace @{LogonHours=$horario} -HomeDirectory $ruta -HomeDrive "H:"
     
@@ -115,16 +128,24 @@ $bytesNoCuates = [byte[]](
   }
 function setHours{
 $bytesCuates = [byte[]](
-    0,248,127, 0,248,127,
-    0,248,127, 0,248,127,
-    0,248,127, 0,248,127,
-    0,248,127
+    0, 128, 63,   # Domingo
+    0, 128, 63,   # Lunes
+    0, 128, 63,   # Martes
+    0, 128, 63,   # Miércoles
+    0, 128, 63,   # Jueves
+    0, 128, 63,   # Viernes
+    0, 128, 63    # Sábado
 )
+
+# NoCuates: 3pm-2am MST (UTC 22:00-09:59) — cruza medianoche UTC
 $bytesNoCuates = [byte[]](
-    255,1,192, 255,1,192,
-    255,1,192, 255,1,192,
-    255,1,192, 255,1,192,
-    255,1,192
+    255, 3, 0,    # Domingo  (solo recibe 0:00-9:59 UTC, sin tarde anterior)
+    255, 3, 192,  # Lunes
+    255, 3, 192,  # Martes
+    255, 3, 192,  # Miércoles
+    255, 3, 192,  # Jueves
+    255, 3, 192,  # Viernes
+    255, 3, 192   # Sábado
 )
 
     # 255,255,255, 255,255,255,
