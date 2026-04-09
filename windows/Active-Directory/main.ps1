@@ -1,6 +1,6 @@
 
 . "$PSScriptRoot\funciones_ad.ps1"
-
+. "$PSScriptRoot\funciones_smdfa.ps1"
 #importacion de los modulos necesarios
 Import-Module ActiveDirectory
 Import-Module GroupPolicy
@@ -29,6 +29,11 @@ Write-Host "9) Configurar Fsrm para bloqueo de archivos formato(mp3,mp4,exe,msi)
 Write-Host "10) Configurar carpetas de usuarios"
 Write-Host "11) Setear las horas permititdas"
 Write-Host "12) PROCESAR TODOS LOS DATOS DE MANERA PREDEFINIDA"
+Write-Host "13) Crear usuarios administradores delegados"
+Write-Host "14) Asignar permisos RBAC a los admins"
+Write-Host "15) Configurar auditoria de eventos"
+Write-Host "16) Configurar politicas de contrasena FGPP"
+Write-Host "17) Extraer reporte de accesos denegados"
 Write-Host "0)salir"
 
     $opc= Read-Host "Opcion a ejecutar:"
@@ -93,6 +98,11 @@ switch($opc){
     accesFolders  # <- faltaba
     setHours    
   }
+"13" { crear_admins }
+"14" { asignar_permisos_admins }
+"15" { configurar_auditoria }
+"16" { configurar_FGPP }
+"17" { extraer_accesos_denegados }
   "0"{
       return
     }
