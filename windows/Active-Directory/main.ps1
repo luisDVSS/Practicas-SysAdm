@@ -2,9 +2,9 @@
 . "$PSScriptRoot\funciones_smdfa.ps1"
 
 # Importacion de modulos necesarios
-Import-Module ActiveDirectory
-Import-Module GroupPolicy
-Import-Module FileServerResourceManager
+# Import-Module ActiveDirectory
+# Import-Module GroupPolicy
+# Import-Module FileServerResourceManager
 
 while($true) {
 
@@ -12,7 +12,6 @@ while($true) {
     Write-Host "========================================" -ForegroundColor Cyan
     Write-Host "   SERVICIO DE ACTIVE DIRECTORY MENU   " -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
-
     Write-Host ""
     Write-Host "--- INSTALACION Y ESTRUCTURA ---" -ForegroundColor Yellow
     Write-Host "1)  Instalacion de Active Directory / init Forest & dominio empresa.local"
@@ -22,30 +21,13 @@ while($true) {
     Write-Host "5)  Configurar GPO NoCuates"
     Write-Host "6)  Añadir reglas de ejecucion a cada grupo (AppLocker)"
     Write-Host "7)  Linkear GPOs con sus OUs"
-
     Write-Host ""
     Write-Host "--- USUARIOS Y RECURSOS ---" -ForegroundColor Yellow
     Write-Host "8)  Registro de usuarios (del CSV)"
     Write-Host "9)  Configurar FSRM (bloqueo mp3, mp4, exe, msi)"
     Write-Host "10) Configurar carpetas de usuarios (red + permisos ACL)"
     Write-Host "11) Setear horarios permitidos"
-
-    Write-Host ""
-    Write-Host "--- SEGURIDAD Y RBAC ---" -ForegroundColor Yellow
-    Write-Host "13) Crear usuarios administradores delegados"
-    Write-Host "14) Asignar permisos RBAC a los admins"
-    Write-Host "15) Configurar auditoria de eventos"
-    Write-Host "16) Configurar politicas de contrasena (FGPP)"
-    Write-Host "17) Extraer reporte de accesos denegados"
-
-    Write-Host ""
-    Write-Host "--- MFA ---" -ForegroundColor Yellow
-    Write-Host "18) Instalar y configurar MultiOTP + MFA por SSH"
-
-    Write-Host ""
-    Write-Host "--- EJECUCION RAPIDA ---" -ForegroundColor Yellow
     Write-Host "12) PROCESAR TODOS LOS DATOS DE MANERA PREDEFINIDA"
-
     Write-Host ""
     Write-Host "0)  Salir" -ForegroundColor Red
     Write-Host ""
@@ -134,37 +116,6 @@ while($true) {
             Write-Host ""
             Write-Host ">>> PROCESO COMPLETO FINALIZADO <<<" -ForegroundColor Magenta
         }
-
-        "13" {
-            Write-Host "Creando usuarios administradores delegados..." -ForegroundColor Cyan
-            crear_admins
-        }
-
-        "14" {
-            Write-Host "Asignando permisos RBAC a los admins..." -ForegroundColor Cyan
-            asignar_permisos_admins
-        }
-
-        "15" {
-            Write-Host "Configurando auditoria de eventos..." -ForegroundColor Cyan
-            configurar_auditoria
-        }
-
-        "16" {
-            Write-Host "Configurando politicas de contrasena FGPP..." -ForegroundColor Cyan
-            configurar_FGPP
-        }
-
-        "17" {
-            Write-Host "Extrayendo reporte de accesos denegados..." -ForegroundColor Cyan
-            extraer_accesos_denegados
-        }
-
-        "18" {
-            Write-Host "Iniciando configuracion de MultiOTP + MFA por SSH..." -ForegroundColor Cyan
-            & "$PSScriptRoot\setup_multiotp_ssh.ps1"
-        }
-
         "0" {
             Write-Host "Saliendo..." -ForegroundColor Red
             return
